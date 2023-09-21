@@ -12,8 +12,8 @@ import {
   Button,
   Grid,
   // Snackbar,
-  //Illustration,
-  //IMAGES,
+  Illustration,
+  IMAGES,
   //TextField,
   Pagination,
   TableFooter,
@@ -23,6 +23,7 @@ import {
   INLINE_VARIANT
 } from '@ellucian/react-design-system/core';
 import {
+  spacing40,
   spacing50,
   spacing60
 } from '@ellucian/react-design-system/core/styles/tokens';
@@ -32,12 +33,27 @@ import { CircularProgress } from '@ellucian/react-design-system/core';
 import { Icon } from '@ellucian/ds-icons/lib';
 import PropTypes from 'prop-types';
 import { getAllDonors, deleteDonor } from '../service/api';
-import { withStyles } from '@ellucian/react-design-system/core/styles';
+// import { withStyles } from '@ellucian/react-design-system/core/styles';
 import { widthFluid } from '@ellucian/react-design-system/core/styles/tokens';
 import { useHistory } from 'react-router-dom';
 import { makeStyles } from '@ellucian/react-design-system/core';
 import { format } from 'date-fns';
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) =>({
+  
+item: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-evenly',
+    padding: spacing40,
+    textAlign: 'center',
+    width: 'calc(100%/2)',
+    [theme.breakpoints.down('lg')]: {
+        width: 'calc(100%/2)',
+    },
+    '@media (max-width: 44rem)': {
+        width: 'calc(100%/1)',
+    },
+},
   inline: {
     marginTop: spacing60,
   },
@@ -50,10 +66,11 @@ const useStyles = makeStyles({
     // backgroundColor: '#5353d1',
     // color: 'white',    
   },
-});
-
-
-const styles = (theme) => ({
+  image: {
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+},
   progressroot: {
     display: 'flex',
     '& > * + *': {
@@ -87,15 +104,12 @@ const styles = (theme) => ({
     justifyContent: 'center',
     alignItems: 'center'
   }
-});
+}));
 
 const AllDonors = () => {
-  //const { classes } = props;
-  // const customId = 'Donor Detail';
+ 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [open, setOpen] = useState(false);
-  // const [snackBarMessage, setSnackBarMessage] = useState(null);
-  // const [snackbarVariant,setsnackbarVariant]=useState('success');
   const [orderBy, setOrderBy] = useState('BookTitle');
   const [order, setOrder] = useState('asc');
   const classes = useStyles();
@@ -104,11 +118,11 @@ const AllDonors = () => {
   const [loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [search, setSearch] = useState('');
+  const [servererror, setservererror] = useState(false);
   const deleteText = 'Deleted Successfully';
   const customId = 'Donor Detail';
   const handleClearClick = () => {
     setSearch('');
-    // setSearchValue('');
     setSearchValue('');
     getAllDonor();
   };
@@ -120,14 +134,7 @@ const AllDonors = () => {
   const handleClose = () => {
     setOpen(false);
   };
-  // const handleKeyDown = (event) => {
-  //     setSearchKeyDown(event.key);
-  // };
-
-  // const handleKeyUp = (event) => {
-  //     setSearchKeyUp(event.key);
-  // };
-
+ 
   const [paginationOption, setPaginationOptions] = useState({
     rowsPerPage: 5,
     page: 0
@@ -193,7 +200,6 @@ const AllDonors = () => {
   };
 
   const handleDelete = async () => {
-    //console.log('Delete property', dialogOpen);
     const response = await deleteDonor(dialogOpen);
     console.log(response);
     setDialogOpen(false);
@@ -218,13 +224,16 @@ const AllDonors = () => {
 
   const getAllDonor = async () => {
     setLoading(true);
+    
     try {
       let response = await getAllDonors();
       console.log(response);
       setDonors(response.data);
       setLoading(false);
     } catch (error) {
+      setservererror(true);
       console.log('error in get all donors', error);
+      
       setLoading(false);
     }
   };
@@ -248,109 +257,120 @@ const AllDonors = () => {
     setDonors(data);
   }, [order, orderBy]);
   const constructTable = () => {
-
-    return (
-      <Table stickyHeader className={classes.table} style={{ alignItems: 'center', marginLeft: '15px', marginRight: '30px', marginTop: '15px' }}>
-        <TableHead>
-          <TableRow>
-            {/* <TableCell>S NO</TableCell> */}
-            <TableCell className={classes.tableHeader}>
-              <TableSortLabel
-                onClick={() => handleSort('donorRefID')}
-                active={orderBy === 'donorRefID'}
-                direction={order}
-              >
-                ID
-              </TableSortLabel>
-            </TableCell>
-            <TableCell className={classes.tableHeader}>
-              <TableSortLabel
-                onClick={() => handleSort('donorName')}
-                active={orderBy === 'donorName'}
-                direction={order}
-              >
-                Name
-              </TableSortLabel>
-            </TableCell>
-            <TableCell className={classes.tableHeader}>Year Of PassOut</TableCell>
-            <TableCell className={classes.tableHeader}>Date Of Birth</TableCell>
-            <TableCell className={classes.tableHeader}>Age</TableCell>
-            <TableCell className={classes.tableHeader}>Address</TableCell>
-            <TableCell className={classes.tableHeader}>City</TableCell>
-            <TableCell className={classes.tableHeader}>State</TableCell>
-            <TableCell className={classes.tableHeader}>Phone Number</TableCell>
-            <TableCell className={classes.tableHeader}>Donation Type</TableCell>
-            <TableCell className={classes.tableHeader}>Available Time Durations</TableCell>
-            <TableCell className={classes.tableHeader}>Donation Amount $</TableCell>
-            <TableCell className={classes.tableHeader}>Charity Type</TableCell>
-            <TableCell className={classes.tableHeader}>Description</TableCell>
-            <TableCell className={classes.tableHeader}>Action</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {donors
-            .slice(
-              paginationOption.page * paginationOption.rowsPerPage,
-              paginationOption.page * paginationOption.rowsPerPage +
-              paginationOption.rowsPerPage
-              //1st - 0,2, 2nd-> 2,4 , 3rd-> 4,6 calculation for above code for page:0 and rowsperpage:2
-            )
-            .map((donor) => {
-              console.log('donor', donor);
-              return (
-                <TableRow key={donor._id}>
-                  <TableCell>{donor.donorRefID}</TableCell>
-                  <TableCell>{donor.donorName}</TableCell>
-                  <TableCell>{donor.yearOfPassOut}</TableCell>
-                  <TableCell>{format(new Date(donor.dateOfBirth), 'dd-MM-yyyy')}</TableCell>
-                  <TableCell>{donor.age}</TableCell>
-                  <TableCell>{donor?.addressLine1}, {donor?.addressLine2}</TableCell>
-                  <TableCell>{donor.city}</TableCell>
-                  <TableCell>{donor.state}</TableCell>
-                  <TableCell>{donor.phoneNumber}</TableCell>
-                  <TableCell>{donor?.donationType?.join(', ')}</TableCell>
-                  <TableCell>{donor?.availableTimeDurations?.join(', ')}</TableCell>
-                  <TableCell>{donor.donationAmount}</TableCell>
-                  <TableCell>{donor.charityType}</TableCell>
-                  <TableCell>{donor.description}</TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => history.push(`/edit-form/${donor._id}`)} id={`Edit_Button`} style={{ marginRight: '15px', height: '2rem', width: '2rem', marginBottom: '2px' }}>
-                      <Icon name="edit" />
-                    </IconButton>
-                    <IconButton onClick={() => setDialogOpen(donor._id)} id={`Delete_Button`} style={{ marginRight: '15px', height: '2rem', width: '2rem' }}>
-                      <Icon name="trash" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <Pagination
-              component='td'
-              count={Object.keys(donors).length}
-              rowsPerPage={paginationOption.rowsPerPage}
-              rowsPerPageOptions={[2, 5, 10]}
-              page={paginationOption.page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
+    if (servererror){
+      return <div className={classes.Illustration}><img alt="" src="https://cdn.elluciancloud.com/assets/EDS2/7.5.0/img/illustrations/large/404Narrow.png" /></div>}
+      else if(donors.length==0)
+      {
+        return (
+        <div className={classes.item}>
+          <Illustration name={IMAGES.NO_MESSAGES} />
+        </div>)
+      }
+      else{
+        return (
+          <Table stickyHeader className={classes.table} style={{ alignItems: 'center', marginLeft: '15px', marginRight: '30px', marginTop: '15px' }}>
+            <TableHead>
+              <TableRow>
+                
+                <TableCell className={classes.tableHeader}>
+                  <TableSortLabel
+                    onClick={() => handleSort('donorRefID')}
+                    active={orderBy === 'donorRefID'}
+                    direction={order}
+                  >
+                    ID
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell className={classes.tableHeader}>
+                  <TableSortLabel
+                    onClick={() => handleSort('donorName')}
+                    active={orderBy === 'donorName'}
+                    direction={order}
+                  >
+                    Name
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell className={classes.tableHeader}>Year Of PassOut</TableCell>
+                <TableCell className={classes.tableHeader}>Date Of Birth</TableCell>
+                <TableCell className={classes.tableHeader}>Age</TableCell>
+                <TableCell className={classes.tableHeader}>Address</TableCell>
+                <TableCell className={classes.tableHeader}>City</TableCell>
+                <TableCell className={classes.tableHeader}>State</TableCell>
+                <TableCell className={classes.tableHeader}>Phone Number</TableCell>
+                <TableCell className={classes.tableHeader}>Donation Type</TableCell>
+                <TableCell className={classes.tableHeader}>Available Time Durations</TableCell>
+                <TableCell className={classes.tableHeader}>Donation Amount $</TableCell>
+                <TableCell className={classes.tableHeader}>Charity Type</TableCell>
+                <TableCell className={classes.tableHeader}>Description</TableCell>
+                <TableCell className={classes.tableHeader}>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {donors
+                .slice(
+                  paginationOption.page * paginationOption.rowsPerPage,
+                  paginationOption.page * paginationOption.rowsPerPage +
+                  paginationOption.rowsPerPage
+                  //1st - 0,2, 2nd-> 2,4 , 3rd-> 4,6 calculation for above code for page:0 and rowsperpage:2
+                )
+                .map((donor) => {
+                  console.log('donor', donor);
+                  return (
+                    <TableRow key={donor._id}>
+                      <TableCell>{donor.donorRefID}</TableCell>
+                      <TableCell>{donor.donorName}</TableCell>
+                      <TableCell>{donor.yearOfPassOut}</TableCell>
+                      <TableCell>{format(new Date(donor.dateOfBirth), 'dd-MM-yyyy')}</TableCell>
+                      <TableCell>{donor.age}</TableCell>
+                      <TableCell>{donor?.addressLine1}, {donor?.addressLine2}</TableCell>
+                      <TableCell>{donor.city}</TableCell>
+                      <TableCell>{donor.state}</TableCell>
+                      <TableCell>{donor.phoneNumber}</TableCell>
+                      <TableCell>{donor?.donationType?.join(', ')}</TableCell>
+                      <TableCell>{donor?.availableTimeDurations?.join(', ')}</TableCell>
+                      <TableCell>{donor.donationAmount}</TableCell>
+                      <TableCell>{donor.charityType}</TableCell>
+                      <TableCell>{donor.description}</TableCell>
+                      <TableCell>
+                        <IconButton onClick={() => history.push(`/edit-form/${donor._id}`)} id={`Edit_Button`} style={{ marginRight: '15px', height: '2rem', width: '2rem', marginBottom: '2px' }}>
+                          <Icon name="edit" />
+                        </IconButton>
+                        <IconButton onClick={() => setDialogOpen(donor._id)} id={`Delete_Button`} style={{ marginRight: '15px', height: '2rem', width: '2rem' }}>
+                          <Icon name="trash" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <Pagination
+                  component='td'
+                  count={Object.keys(donors).length}
+                  rowsPerPage={paginationOption.rowsPerPage}
+                  rowsPerPageOptions={[2, 5, 10]}
+                  page={paginationOption.page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+              </TableRow>
+            </TableFooter>
+            <Confirmation
+              contentText='Are you sure, you want to delete this donor?'
+              dialogOpen={dialogOpen}
+              primaryOnClick={handleDelete}
+              primaryText='Delete'
+              secondaryOnClick={() => setDialogOpen(false)}
+              secondaryText='Cancel'
+              title='Delete Donor'
             />
-          </TableRow>
-        </TableFooter>
-        <Confirmation
-          contentText='Are you sure, you want to delete this donor?'
-          dialogOpen={dialogOpen}
-          primaryOnClick={handleDelete}
-          primaryText='Delete'
-          secondaryOnClick={() => setDialogOpen(false)}
-          secondaryText='Cancel'
-          title='Delete Donor'
-        />
-      </Table>
-
-
-    );
+          </Table>
+    
+    
+        );
+      }
+    
   };
 
   return (
@@ -416,4 +436,4 @@ AllDonors.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(AllDonors);
+export default AllDonors;

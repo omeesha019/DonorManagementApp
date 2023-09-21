@@ -453,7 +453,7 @@ const AddDonors = (props) => {
                                 </div>
                             </div>
 
-                            <div className={classes.fieldContainer}>
+                            <div className={classes.fieldContainer} style={{margin:'15px 0px'}}>
                                 <div className={classes.fieldName}>
                                     <Typography
                                         variant='body1'
@@ -664,7 +664,6 @@ const AddDonors = (props) => {
                                             label="Available Time Duration"
                                             onChange={handleChange}
                                             multiple
-                                            //required
                                             name='availableTimeDurations'
                                             fullWidth={true}
                                             value={donor.availableTimeDurations}
@@ -700,7 +699,6 @@ const AddDonors = (props) => {
                                             name="donationAmount"
                                             fullWidth={true}
                                             label="Donation Amount"
-                                            //required
                                             className="contact-input-field"
                                             value={donor.donationAmount}
                                             error={errorMessage.donationAmount}
@@ -731,15 +729,6 @@ const AddDonors = (props) => {
                                             error={errorMessage.charityType}
                                             helperText={errorMessage.charityType}
                                             fullWidth={true}
-                                            open={open}
-                                            onOpen={(event) => {
-                                                console.log('*** onOpen handler called ***', event);
-                                                setOpen(true);
-                                            }}
-                                            onClose={(event) => {
-                                                console.log('*** onClose handler called ***', event);
-                                                setOpen(false);
-                                            }}
                                         >
                                             {CharityTypeOptions.map((option) => (
                                                 <DropdownItem
